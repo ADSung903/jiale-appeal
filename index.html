@@ -393,6 +393,7 @@
   </div>
   <div class="header-right">
     <span class="user-chip" id="userChip"></span>
+    <button class="admin-btn" onclick="doLogout()">登出</button>
     <div id="adminControl">
       <button class="admin-btn" onclick="openAdminPanel()">管理員</button>
     </div>
@@ -813,6 +814,12 @@ function showToast(msg, type = "") {
 }
 function showLoading(msg) { document.getElementById("loadingText").textContent = msg || "載入中…"; document.getElementById("loadingOverlay").classList.add("show"); }
 function hideLoading() { document.getElementById("loadingOverlay").classList.remove("show"); }
+
+window.doLogout = () => {
+  if (!confirm("確定要登出嗎？")) return;
+  localStorage.removeItem("jiale_user");
+  location.reload();
+};
 
 // restore session init
 if (currentUser) loadFiles();

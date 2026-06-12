@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>佳樂科技訴願補件系統</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --accent: #2C4A7C;
+    --accent-light: #E8EDF5;
+    --green: #2E7D5A;
+    --green-light: #E6F4EE;
+    --orange: #B85500;
+    --orange-light: #FFF0E0;
+    --text: #1E2A3A;
+    --subtext: #5A6A7E;
+    --muted: #9AA5B4;
+    --border: #D0D7E2;
+    --bg: #F7F8FA;
+    --white: #FFFFFF;
+    --red: #C0392B;
+    --red-light: #FDECEA;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--accent);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .header-left h1 { font-size: 17px; font-weight: 700; color: #fff; }
+  .header-left p { font-size: 11px; color: #B8C8E0; margin-top: 2px; }
+  .admin-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .admin-btn:hover { background: rgba(255,255,255,0.25); }
+  .admin-badge {
+    background: #F5A623;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* INTRO BANNER */
+  .intro-banner {
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    margin: 16px;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--accent);
+    line-height: 1.6;
+  }
+  .intro-banner strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  /* SECTION TABS */
+  .tabs {
+    display: flex;
+    margin: 0 16px 4px;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .tab {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    background: var(--white);
+  }
+  .tab.accent { color: var(--accent); border-color: var(--border); }
+  .tab.accent.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab.green { color: var(--green); border-color: var(--border); }
+  .tab.green.active { background: var(--green); color: #fff; border-color: var(--green); }
+  .tab.orange { color: var(--orange); border-color: var(--border); }
+  .tab.orange.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+  /* SECTION PANEL */
+  .section-panel { display: none; padding: 0 16px 16px; }
+  .section-panel.active { display: block; }
+
+  .section-header {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .section-header h2 { font-size: 15px; font-weight: 700; color: var(--text); }
+  .section-header p { font-size: 12px; color: var(--subtext); margin-top: 4px; line-height: 1.5; }
+  .section-header .who-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    background: var(--white);
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-zone h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .upload-zone p { font-size: 12px; color: var(--subtext); line-height: 1.6; }
+  .upload-zone .spec { 
+    margin-top: 10px; 
+    padding: 8px 12px; 
+    background: var(--bg); 
+    border-radius: 8px; 
+    font-size: 11px; 
+    color: var(--muted);
+    text-align: left;
+    line-height: 1.8;
+  }
+  .upload-zone input[type=file] { display: none; }
+
+  /* NAME INPUT */
+  .name-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .name-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--white);
+    outline: none;
+  }
+  .name-input:focus { border-color: var(--accent); }
+
+  /* PROGRESS */
+  .upload-progress {
+    display: none;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .progress-bar-wrap {
+    background: var(--bg);
+    border-radius: 999px;
+    height: 8px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .progress-label { font-size: 12px; color: var(--subtext); }
+
+  /* FILE LIST */
+  .file-list { display: flex; flex-direction: column; gap: 8px; }
+  .file-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .file-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--bg);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .file-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .file-info { flex: 1; min-width: 0; }
+  .file-info .fname { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-info .fmeta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .file-info .fno { font-size: 11px; font-weight: 600; color: var(--accent); margin-top: 2px; }
+  .file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-view {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--subtext);
+  }
+  .btn-delete {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--red);
+    background: var(--red-light);
+    color: var(--red);
+  }
+  .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 8px; }
+
+  /* ADMIN PANEL */
+  .admin-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .admin-panel.show { display: flex; }
+  .admin-sheet {
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px 16px 40px;
+  }
+  .admin-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .admin-sheet h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .admin-sheet p { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
+
+  .password-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .password-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+  }
+  .password-input:focus { border-color: var(--accent); }
+  .btn-primary {
+    padding: 10px 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-danger {
+    padding: 8px 14px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-export {
+    width: 100%;
+    padding: 14px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-close {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg);
+    color: var(--subtext);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1E2A3A;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    z-index: 999;
+    transition: transform 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--green); }
+  .toast.error { background: var(--red); }
+
+  /* ADMIN FILE ROW */
+  .admin-file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bg);
+  }
+  .admin-file-row:last-child { border-bottom: none; }
+  .admin-file-info { flex: 1; min-width: 0; }
+  .admin-file-info .af-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .admin-file-info .af-meta { font-size: 11px; color: var(--muted); }
+
+  .section-count {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .section-count.green { background: var(--green); }
+  .section-count.orange { background: var(--orange); }
+
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.8);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--subtext);
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .footer {
+    text-align: center;
+    padding: 20px 16px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span id="loadingText">載入中…</span>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <h1>佳樂科技訴願補件系統</h1>
+    <p>佳樂科技股份有限公司積欠工資墊償申請案</p>
+  </div>
+  <div id="adminControl">
+    <button class="admin-btn" onclick="openAdminPanel()">管理員</button>
+  </div>
+</div>
+
+<div class="intro-banner">
+  <strong>📋 給各位同仁</strong>
+  訴願書已完成，附件一～三我這邊搞定了。現在麻煩大家各自上傳在職證明照片或 PDF，2～3 樣最直接的就夠了。有問題直接找宋文貴。
+  <br><br>
+  <span style="font-size:12px;">由 Adrian S.（宋文貴）建立　‧　僅供本案訴願使用</span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab accent active" onclick="switchTab('s4')">
+    附件四 <span class="section-count" id="cnt4">0</span>
+  </button>
+  <button class="tab green" onclick="switchTab('s5')">
+    附件五 <span class="section-count green" id="cnt5">0</span>
+  </button>
+  <button class="tab orange" onclick="switchTab('s6')">
+    附件六 <span class="section-count orange" id="cnt6">0</span>
+  </button>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section-panel active" id="panel-s4">
+  <div class="section-header">
+    <h2>附件四　技術與職務實質證明</h2>
+    <p>證明公司確有實質科技研發活動，與負責人犯罪行為無關。</p>
+    <span class="who-badge" style="background:var(--accent-light);color:var(--accent);">負責人：宋文貴、張惠民</span>
+    <div style="margin-top:10px;font-size:12px;color:var(--subtext);">
+      建議上傳：研發專案時程截圖、技術文件首頁、認證證書（CE/FCC/BSMI 任一）
+    </div>
+  </div>
+  <div class="name-row">
+    <input class="name-input" id="name4" placeholder="請填你的姓名（例：宋文貴）" maxlength="20">
+  </div>
+  <div class="upload-zone" id="zone4" onclick="document.getElementById('file4').click()"
+    ondragover="handleDragOver(event,'zone4')" ondragleave="handleDragLeave(event,'zone4')" ondrop="handleDrop(event,'s4')">
+    <input type="file" id="file4" accept="image/*,.pdf" multiple onchange="handleFiles(this.files,'s4')">
+    <div class="upload-icon">📁</div>
+    <h3>點此上傳檔案</h3>
+    <p>或將檔案拖曳至此</p>
+    <div class="spec">
+      ✅ 接受格式：JPG、PNG、PDF<br>
+      ✅ 單檔上限：10 MB<br>
+      ✅ 可一次選多張<br>
+      ⚠️ 請確認姓名、日期清晰可見
+    </div>
+  </div>
+  <div class="upload-progress" id="prog4">
+    <div class="progress-label" id="progLabel4">上傳中…</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progBar4"></div></div>
+  </div>
+  <div class="file-list" id="list4"></div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section-panel" id="panel-s5">
+  <div class="section-header">
+    <h2>附件五　正常商業營運證明</h2>
+    <p>證明佳樂科技有真實商業活動，並非吸金空殼組織。</p>
+    <span class="who-badge" style="background:var(--green-light);color:var(--green);">負責人：各位同仁</span>
+    <div style="margin-top:10px;font-size:12px;color:var(--subtext);">
+      建議上傳：出貨單、商業發票截圖、與供應商採購郵件截圖（主旨帶佳樂科技即可）
+    </div>
+  </div>
+  <div class="name-row">
+    <input class="name-input" id="name5" placeholder="請填你的姓名（例：張惠民）" maxlength="20">
+  </div>
+  <div class="upload-zone" id="zone5" onclick="document.getElementById('file5').click()"
+    ondragover="handleDragOver(event,'zone5')" ondragleave="handleDragLeave(event,'zone5')" ondrop="handleDrop(event,'s5')">
+    <input type="file" id="file5" accept="image/*,.pdf" multiple onchange="handleFiles(this.files,'s5')">
+    <div class="upload-icon">📁</div>
+    <h3>點此上傳檔案</h3>
+    <p>或將檔案拖曳至此</p>
+    <div class="spec">
+      ✅ 接受格式：JPG、PNG、PDF<br>
+      ✅ 單檔上限：10 MB<br>
+      ✅ 可一次選多張<br>
+      ⚠️ 請確認姓名、日期清晰可見
+    </div>
+  </div>
+  <div class="upload-progress" id="prog5">
+    <div class="progress-label" id="progLabel5">上傳中…</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progBar5"></div></div>
+  </div>
+  <div class="file-list" id="list5"></div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section-panel" id="panel-s6">
+  <div class="section-header">
+    <h2>附件六　個人在職出勤及薪資紀錄</h2>
+    <p>每位訴願人各自備份，證明實質出勤與合法薪資對價。</p>
+    <span class="who-badge" style="background:var(--orange-light);color:var(--orange);">負責人：各位同仁（每人自備）</span>
+    <div style="margin-top:10px;font-size:12px;color:var(--subtext);">
+      建議上傳：打卡/出勤截圖（姓名+日期可見）、薪資單或扣繳憑單、Teams/Outlook 工作指派截圖
+    </div>
+  </div>
+  <div class="name-row">
+    <input class="name-input" id="name6" placeholder="請填你的姓名（例：王小明）" maxlength="20">
+  </div>
+  <div class="upload-zone" id="zone6" onclick="document.getElementById('file6').click()"
+    ondragover="handleDragOver(event,'zone6')" ondragleave="handleDragLeave(event,'zone6')" ondrop="handleDrop(event,'s6')">
+    <input type="file" id="file6" accept="image/*,.pdf" multiple onchange="handleFiles(this.files,'s6')">
+    <div class="upload-icon">📁</div>
+    <h3>點此上傳檔案</h3>
+    <p>或將檔案拖曳至此</p>
+    <div class="spec">
+      ✅ 接受格式：JPG、PNG、PDF<br>
+      ✅ 單檔上限：10 MB<br>
+      ✅ 可一次選多張<br>
+      ⚠️ 請確認姓名、日期清晰可見
+    </div>
+  </div>
+  <div class="upload-progress" id="prog6">
+    <div class="progress-label" id="progLabel6">上傳中…</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progBar6"></div></div>
+  </div>
+  <div class="file-list" id="list6"></div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel" onclick="closeAdminOnBg(event)">
+  <div class="admin-sheet">
+    <div class="admin-handle"></div>
+    <h2>🔐 管理員面板</h2>
+    <p>輸入密碼後可刪除任何檔案並匯出完整附件清單。</p>
+
+    <div id="adminLoginSection">
+      <div class="password-row">
+        <input class="password-input" type="password" id="pwdInput" placeholder="輸入管理員密碼" onkeydown="if(event.key==='Enter')checkAdmin()">
+        <button class="btn-primary" onclick="checkAdmin()">確認</button>
+      </div>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+      <div style="background:var(--green-light);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--green);font-weight:600;">
+        ✅ 管理員模式已啟用
+      </div>
+
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">所有已上傳檔案</h3>
+      <div id="adminFileList"></div>
+
+      <button class="btn-export" onclick="exportList()">
+        📄 匯出附件清單（複製文字）
+      </button>
+      <button class="btn-close" onclick="closeAdminPanel()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="footer">
+  佳樂科技積欠工資墊償訴願補件系統　‧　由 Adrian S. 建立　‧　僅供本案使用
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyALiEJge3sw7SBk-qtRv2Fvpi0GtVx38Aw",
+  authDomain: "jiale-appeal.firebaseapp.com",
+  projectId: "jiale-appeal",
+  storageBucket: "jiale-appeal.firebasestorage.app",
+  messagingSenderId: "535115045380",
+  appId: "1:535115045380:web:050bf8e9386b2ba4c93351",
+  measurementId: "G-WR7K6GP9L5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const ADMIN_PWD = "0328";
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const SECTIONS = { s4: "附件四", s5: "附件五", s6: "附件六" };
+const SECTION_COLORS = { s4: "accent", s5: "green", s6: "orange" };
+
+// local device ID
+let deviceId = localStorage.getItem("jiale_device_id");
+if (!deviceId) {
+  deviceId = "dev_" + Math.random().toString(36).slice(2) + Date.now();
+  localStorage.setItem("jiale_device_id", deviceId);
+}
+
+let isAdmin = false;
+let allFiles = { s4: [], s5: [], s6: [] };
+
+window.switchTab = (sec) => {
+  document.querySelectorAll(".section-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("panel-" + sec).classList.add("active");
+  const idx = { s4: 0, s5: 1, s6: 2 }[sec];
+  document.querySelectorAll(".tab")[idx].classList.add("active");
+};
+
+window.handleDragOver = (e, zoneId) => {
+  e.preventDefault();
+  document.getElementById(zoneId).classList.add("dragover");
+};
+window.handleDragLeave = (e, zoneId) => {
+  document.getElementById(zoneId).classList.remove("dragover");
+};
+window.handleDrop = (e, sec) => {
+  e.preventDefault();
+  const zoneId = "zone" + sec.slice(1);
+  document.getElementById(zoneId).classList.remove("dragover");
+  handleFiles(e.dataTransfer.files, sec);
+};
+
+window.handleFiles = async (files, sec) => {
+  const num = sec.slice(1);
+  const name = document.getElementById("name" + num).value.trim();
+  if (!name) { showToast("請先填寫你的姓名", "error"); return; }
+
+  for (const file of files) {
+    if (file.size > MAX_SIZE) {
+      showToast(`${file.name} 超過 10MB 限制`, "error");
+      continue;
+    }
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+      showToast("僅支援圖片或 PDF", "error");
+      continue;
+    }
+    await uploadFile(file, sec, name);
+  }
+};
+
+async function uploadFile(file, sec, uploaderName) {
+  const num = sec.slice(1);
+  const progDiv = document.getElementById("prog" + num);
+  const progBar = document.getElementById("progBar" + num);
+  const progLabel = document.getElementById("progLabel" + num);
+  progDiv.style.display = "block";
+
+  const ext = file.name.split(".").pop();
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_\u4e00-\u9fff]/g, "_");
+  const storagePath = `${sec}/${Date.now()}_${safeName}`;
+  const storageRef = ref(storage, storagePath);
+  const task = uploadBytesResumable(storageRef, file);
+
+  return new Promise((resolve) => {
+    task.on("state_changed",
+      (snap) => {
+        const pct = Math.round(snap.bytesTransferred / snap.totalBytes * 100);
+        progBar.style.width = pct + "%";
+        progLabel.textContent = `上傳中 ${pct}%　${file.name}`;
+      },
+      (err) => {
+        showToast("上傳失敗：" + err.message, "error");
+        progDiv.style.display = "none";
+        resolve();
+      },
+      async () => {
+        const url = await getDownloadURL(task.snapshot.ref);
+        await addDoc(collection(db, "files"), {
+          section: sec,
+          sectionLabel: SECTIONS[sec],
+          name: file.name,
+          uploader: uploaderName,
+          deviceId,
+          url,
+          storagePath,
+          type: file.type,
+          size: file.size,
+          uploadedAt: Date.now(),
+        });
+        progDiv.style.display = "none";
+        progBar.style.width = "0%";
+        showToast("✅ 上傳成功：" + file.name, "success");
+        resolve();
+      }
+    );
+  });
+}
+
+async function loadFiles() {
+  showLoading("載入檔案中…");
+  const q = query(collection(db, "files"), orderBy("uploadedAt", "asc"));
+  onSnapshot(q, (snap) => {
+    allFiles = { s4: [], s5: [], s6: [] };
+    snap.forEach(d => {
+      const data = { id: d.id, ...d.data() };
+      if (allFiles[data.section]) allFiles[data.section].push(data);
+    });
+    renderAll();
+    hideLoading();
+  });
+}
+
+function renderAll() {
+  ["s4", "s5", "s6"].forEach(sec => {
+    const num = sec.slice(1);
+    const list = document.getElementById("list" + num);
+    const cnt = document.getElementById("cnt" + num);
+    const files = allFiles[sec];
+    cnt.textContent = files.length;
+    if (files.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div>尚無上傳的檔案</div>`;
+      return;
+    }
+    list.innerHTML = files.map((f, i) => {
+      const canDelete = isAdmin || f.deviceId === deviceId;
+      const isImg = f.type && f.type.startsWith("image/");
+      const thumb = isImg
+        ? `<div class="file-thumb"><img src="${f.url}" loading="lazy"></div>`
+        : `<div class="file-thumb">📄</div>`;
+      const sizeKB = f.size ? Math.round(f.size / 1024) + " KB" : "";
+      const date = f.uploadedAt ? new Date(f.uploadedAt).toLocaleDateString("zh-TW") : "";
+      return `<div class="file-card" id="fc_${f.id}">
+        ${thumb}
+        <div class="file-info">
+          <div class="fname">${f.name}</div>
+          <div class="fmeta">上傳者：${f.uploader || "—"}　${sizeKB}　${date}</div>
+          <div class="fno">${f.sectionLabel}－第 ${i+1} 件</div>
+        </div>
+        <div class="file-actions">
+          <button class="btn-view" onclick="window.open('${f.url}','_blank')">查看</button>
+          ${canDelete ? `<button class="btn-delete" onclick="deleteFile('${f.id}','${f.storagePath}')">刪除</button>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+  });
+  if (isAdmin) renderAdminList();
+}
+
+window.deleteFile = async (docId, storagePath) => {
+  if (!confirm("確定要刪除這個檔案嗎？")) return;
+  try {
+    await deleteDoc(doc(db, "files", docId));
+    if (storagePath) {
+      await deleteObject(ref(storage, storagePath)).catch(() => {});
+    }
+    showToast("已刪除", "success");
+  } catch (e) {
+    showToast("刪除失敗：" + e.message, "error");
+  }
+};
+
+function renderAdminList() {
+  const el = document.getElementById("adminFileList");
+  const all = [...allFiles.s4, ...allFiles.s5, ...allFiles.s6];
+  if (all.length === 0) {
+    el.innerHTML = `<p style="color:var(--muted);font-size:13px;">目前沒有任何檔案。</p>`;
+    return;
+  }
+  el.innerHTML = all.map((f, i) => `
+    <div class="admin-file-row">
+      <div class="admin-file-info">
+        <div class="af-name">${f.sectionLabel}－${f.uploader || "—"}－${f.name}</div>
+        <div class="af-meta">${f.uploadedAt ? new Date(f.uploadedAt).toLocaleString("zh-TW") : ""}</div>
+      </div>
+      <button class="btn-view" onclick="window.open('${f.url}','_blank')" style="margin-right:4px">查看</button>
+      <button class="btn-danger" onclick="deleteFile('${f.id}','${f.storagePath}')">刪除</button>
+    </div>
+  `).join("");
+}
+
+window.exportList = () => {
+  const all = [...allFiles.s4, ...allFiles.s5, ...allFiles.s6];
+  if (all.length === 0) { showToast("目前沒有檔案可匯出", "error"); return; }
+  let text = "佳樂科技積欠工資墊償訴願　補充附件清單\n";
+  text += "匯出時間：" + new Date().toLocaleString("zh-TW") + "\n\n";
+  ["s4","s5","s6"].forEach(sec => {
+    text += `【${SECTIONS[sec]}】\n`;
+    if (allFiles[sec].length === 0) { text += "  （尚無檔案）\n"; }
+    allFiles[sec].forEach((f, i) => {
+      text += `  ${i+1}. ${f.uploader || "—"}　${f.name}　${f.size ? Math.round(f.size/1024)+"KB" : ""}\n`;
+      text += `     連結：${f.url}\n`;
+    });
+    text += "\n";
+  });
+  navigator.clipboard.writeText(text).then(() => {
+    showToast("✅ 已複製到剪貼簿", "success");
+  }).catch(() => {
+    prompt("請手動複製：", text);
+  });
+};
+
+window.openAdminPanel = () => {
+  document.getElementById("adminPanel").classList.add("show");
+  document.getElementById("pwdInput").value = "";
+  if (!isAdmin) {
+    document.getElementById("adminLoginSection").style.display = "block";
+    document.getElementById("adminContent").style.display = "none";
+  }
+};
+window.closeAdminPanel = () => {
+  document.getElementById("adminPanel").classList.remove("show");
+};
+window.closeAdminOnBg = (e) => {
+  if (e.target === document.getElementById("adminPanel")) closeAdminPanel();
+};
+window.checkAdmin = () => {
+  const pwd = document.getElementById("pwdInput").value;
+  if (pwd === ADMIN_PWD) {
+    isAdmin = true;
+    document.getElementById("adminLoginSection").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    document.getElementById("adminControl").innerHTML = `<span class="admin-badge">👑 管理員</span>`;
+    renderAll();
+    showToast("管理員模式已啟用", "success");
+  } else {
+    showToast("密碼錯誤", "error");
+  }
+};
+
+function showToast(msg, type = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + type;
+  setTimeout(() => t.classList.add("show"), 10);
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+function showLoading(msg) {
+  document.getElementById("loadingText").textContent = msg || "載入中…";
+  document.getElementById("loadingOverlay").classList.add("show");
+}
+function hideLoading() {
+  document.getElementById("loadingOverlay").classList.remove("show");
+}
+
+// init
+loadFiles();
+</script>
+</body>
+</html>

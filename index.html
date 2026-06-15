@@ -529,6 +529,7 @@
       <div id="intruderList"><p style="color:var(--muted);font-size:13px;">目前無紀錄。</p></div>
 
       <button class="btn-export" onclick="exportList()">📄 匯出附件清單（複製文字）</button>
+      <button class="btn-export" onclick="downloadAll()" style="background:var(--accent);margin-top:8px;">⬇️ 一鍵下載全部檔案</button>
       <button class="btn-close" onclick="closeAdminPanel()">關閉</button>
     </div>
   </div>
@@ -767,6 +768,41 @@ async function loadIntruders() {
     }).join("");
   });
 }
+
+window.downloadAll = async () => {
+  const all = [...allFiles.s4, ...allFiles.s5, ...allFiles.s6];
+  if (all.length === 0) { showToast("目前沒有檔案可下載", "error"); return; }
+  if (!confirm(`確定要下載全部 ${all.length} 個檔案嗎？`)) return;
+
+  showToast(`開始下載，共 ${all.length} 個檔案…`);
+
+  for (let i = 0; i < all.length; i++) {
+    const f = all[i];
+    const ext = f.name.includes(".") ? f.name.split(".").pop() : "";
+    const baseName = f.name.includes(".") ? f.name.slice(0, f.name.lastIndexOf(".")) : f.name;
+    const newName = `${f.sectionLabel}_${f.uploader || "未知"}_${baseName}${ext ? "."+ext : ""}`;
+
+    // fetch and trigger download to force correct filename
+    try {
+      const res = await fetch(f.url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = newName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    } catch (e) {
+      // fallback: open in new tab
+      window.open(f.url, "_blank");
+    }
+
+    showToast(`下載中 ${i+1}/${all.length}：${newName}`);
+    await new Promise(r => setTimeout(r, 800));
+  }
+  showToast(`✅ 全部 ${all.length} 個檔案下載完成`, "success");
+};
 
 window.exportList = () => {
   const all = [...allFiles.s4, ...allFiles.s5, ...allFiles.s6];
